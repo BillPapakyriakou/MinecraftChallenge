@@ -1,0 +1,46 @@
+# Ignore Visual Studio files
+.vscode/
+*.suo
+*.user
+*.ipch
+*.pdb
+*.idb
+*.sdf
+*.VC.db
+*.VC.opendb
+
+# Ignore build and binary files
+/build/
+/bin/
+/obj/
+*.o
+*.a
+*.lib
+*.exe
+*.dll
+*.so
+*.dylib
+*.app
+*.out
+
+# Ignore CMake build folders
+CMakeFiles/
+CMakeCache.txt
+
+# Ignore OpenGL shader cache (if applicable)
+*.spv
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+
+# Ignore generated assets
+/assets/*.dds
+/assets/*.tga
+/assets/*.png
+/assets/*.jpg
+
+# Ignore Git submodules or package managers
+.git/modules/
+*.mod
+*.sum

@@ -1,0 +1,26 @@
+#version 330 core
+
+in vec4 fragmentColor;
+in vec2 UV; // Receive texture coordinates from the vertex shader
+out vec4 color;
+
+// Texture data
+uniform sampler2D myTextureSampler;
+
+// Whether to use the texture
+uniform bool useTexture;
+
+void main()
+{
+    vec3 finalColor;
+
+    // Use texture if available, otherwise vertex color
+    if (useTexture) {
+        finalColor = texture(myTextureSampler, UV).rgb;
+    } else {
+        finalColor = fragmentColor.rgb;
+    }
+
+    // Output final color
+    color = vec4(finalColor, 1.0);
+}
