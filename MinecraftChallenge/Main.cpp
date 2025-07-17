@@ -12,8 +12,13 @@
 
 int main(void) {
 
+	int width, height;
+
 	// Create window
 	Window window("Minecraft Challenge", false);
+
+	GLFWwindow* glfwWindow = window.getGLFWwindow();
+	glfwGetFramebufferSize(glfwWindow, &width, &height);
 
 	// Set up the matrices
 	Matrices matrices;
@@ -25,8 +30,9 @@ int main(void) {
 	GLuint textureID = textureLoader.LoadTextureFromImage("dirt.jpg");
 
 
+
 	// Initialize scene
-	matrices.initializeScene();
+	matrices.initializeScene(width, height);
 
 	// Loads shaders
 	GLuint programID = ShaderLoader::LoadShaders("P1BVertexShader.vertexshader", "P1BFragmentShader.fragmentshader");
@@ -46,18 +52,17 @@ int main(void) {
 	BlockManager blockManager(&blockMesh);  // BlockManager manages blocks
 
 	// Add blocks to the manager
-	
 	//blockManager.addBlock(5.0f, 2.0f, 0.0f, 3);  
 	
 
-	// Create a GameWorld with one chunk
-	GameWorld gameWorld(glm::vec3(0.0f, 0.0f, 0.0f), 16);
-
-	// Initialize chunk data once
-	gameWorld.chunk.uploadToMesh(blockMesh);
-
+	GameWorld gameWorld;
+	gameWorld.generateWorld(5);
+	gameWorld.uploadAllChunksToMesh(blockMesh);
 	
 	//float lastTime = glfwGetTime();
+
+	int lastWidth = width;
+	int lastHeight = height;
 
 	do {
 		
@@ -70,14 +75,25 @@ int main(void) {
 
 		window.clearScreen();
 
+		// Get current framebuffer size
+		glfwGetFramebufferSize(glfwWindow, &width, &height);
+		glViewport(0, 0, width, height);  // important line
+
+		// If size changed, update projection
+		if (width != lastWidth || height != lastHeight) {
+			float aspect = static_cast<float>(width) / height;
+			matrices.setProjectionMatrix(glm::perspective(glm::radians(60.0f), aspect, 0.1f, 1000.0f));
+			lastWidth = width;
+			lastHeight = height;
+		}
+
 		// Handle camera movement 
 		camera.handleMovement(window.getGLFWwindow());
 		
 
-		// Render the mesh with the current MVP matrix
-		glm::mat4 MVP = matrices.getMVP();
-		glm::mat4 viewProjection = matrices.getViewProjectionMatrix();
-
+		glm::mat4 view = camera.getViewMatrix();
+		glm::mat4 projection = matrices.getProjectionMatrix();
+		glm::mat4 MVP = projection * view;
 		
 
 		gameWorld.renderWorld(blockMesh, programID, MVP);

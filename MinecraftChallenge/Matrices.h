@@ -15,7 +15,12 @@ private:
 public:
     Matrices();
 
-    void initializeScene();
+    //void initializeScene();
+
+    // Initialize matrices with dynamic aspect ratio
+    void initializeScene(int screenWidth, int screenHeight);
+
+    void updateViewProjection();
 
     void setModelMatrix(const glm::mat4& matrix);
     void setViewMatrix(const glm::mat4& matrix);

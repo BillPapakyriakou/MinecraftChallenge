@@ -9,14 +9,22 @@ Matrices::Matrices() {
 }
 
 // Initialize matrices with default values
-void Matrices::initializeScene() {
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+void Matrices::initializeScene(int screenWidth, int screenHeight) {
+    //model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
     view = glm::lookAt(
         glm::vec3(0.0f, 5.0f, 10.0f),
         glm::vec3(0.0f, 0.0f, -1.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
-    projection = glm::perspective(glm::radians(45.0f), 4.0f / 4.0f, 0.1f, 100.0f);
+    //projection = glm::perspective(glm::radians(45.0f), 4.0f / 4.0f, 0.1f, 100.0f);
+    float aspectRatio = static_cast<float>(screenWidth) / static_cast<float>(screenHeight);
+    projection = glm::perspective(glm::radians(60.0f), aspectRatio, 0.1f, 1000.0f);
+
+    viewProjection = projection * view;
+}
+
+void Matrices::updateViewProjection() {
+    viewProjection = projection * view;
 }
 
 // Setter methods

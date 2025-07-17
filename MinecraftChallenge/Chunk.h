@@ -17,4 +17,6 @@ public:
     void generateChunk();
     void uploadToMesh(Mesh& mesh);  // Upload instance data ONCE
     void render(Mesh& mesh, GLuint programID, glm::mat4 viewProjection);
+
+    const std::vector<Block>& getBlocks() const { return blocks; }
 };

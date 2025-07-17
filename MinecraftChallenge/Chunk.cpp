@@ -20,7 +20,7 @@ void Chunk::generateChunk() {
             }
         }
     }
-    std::cout << "Blocks in chunk: " << blocks.size() << std::endl;
+    //std::cout << "Blocks in chunk: " << blocks.size() << std::endl;
 }
 
 
@@ -36,9 +36,6 @@ void Chunk::uploadToMesh(Mesh& mesh) {
         mesh.updateInstanceBuffer(instancePositions);  // Upload once when the block data changes
     }
 }
-
-
-
 
 
 void Chunk::render(Mesh& mesh, GLuint programID, glm::mat4 viewProjection) {

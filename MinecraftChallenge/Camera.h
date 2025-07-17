@@ -32,7 +32,7 @@ public:
     int height = 800;
 
     // Adjust the speed of the camera and it's sensitivity when looking around
-    float speed = 0.1f;
+    float speed = 0.5f;
     float sensitivity = 100.0f;
 
 
@@ -50,4 +50,8 @@ public:
     void setPosition(const glm::vec3& pos);
     void setOrientation(const glm::vec3& ori);
     void setUp(const glm::vec3& upVec);
+
+    glm::mat4 getViewMatrix() const {
+        return glm::lookAt(position, position + orientation, up);
+    }
 };

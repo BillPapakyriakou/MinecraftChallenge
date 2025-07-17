@@ -1,18 +1,51 @@
 #pragma once
 
 #include "Chunk.h"
+#include "Mesh.h"
 
 class GameWorld {
 public:
-    Chunk chunk;  // A single chunk
+    //Chunk chunk;  // A single chunk
+    std::vector<Chunk> chunks; // List of chunks
+ 
 
-    GameWorld(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), int size = 16)
-        : chunk(position, size) {}  // Create a chunk with specified position and size
+    GameWorld() {}
 
-    // Render the chunk
-    void renderWorld(Mesh& mesh, GLuint programID, glm::mat4 viewProjection) {
-        
-        chunk.render(mesh, programID, viewProjection);
-        
+    void generateWorld(int chunkCount, int chunkSize = 16) {
+        chunks.clear();
+
+        for (int i = 0; i < chunkCount; ++i) {
+            int x = i % 10;         // lay chunks out in a row of 10 (or adjust layout)
+            int z = i / 10;         // increase z every 10 chunks
+            glm::vec3 chunkPos = glm::vec3(x * chunkSize, 0, z * chunkSize);
+
+            Chunk chunk(chunkPos, chunkSize);
+            chunk.generateChunk();
+            chunks.push_back(std::move(chunk));
+        }
     }
+
+    void uploadAllChunksToMesh(Mesh& mesh) {
+        std::vector<glm::vec3> allPositions;
+
+        for (Chunk& chunk : chunks) {
+            for (const Block& block : chunk.getBlocks()) {
+                allPositions.push_back(block.position);
+            }
+        }
+
+        mesh.updateInstanceBuffer(allPositions);
+
+        for (int i = 0; i < chunks.size(); i++) {
+            std::cout << "Chunk " << i << " pos: "
+                << chunks[i].position.x << ", "
+                << chunks[i].position.y << ", "
+                << chunks[i].position.z << std::endl;
+        }
+    }
+
+    void renderWorld(Mesh& mesh, GLuint programID, glm::mat4 viewProjection) {
+        mesh.Render(programID, viewProjection);
+    }
+
 };
