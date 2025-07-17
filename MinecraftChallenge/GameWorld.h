@@ -15,8 +15,8 @@ public:
         chunks.clear();
 
         for (int i = 0; i < chunkCount; ++i) {
-            int x = i % 10;         // lay chunks out in a row of 10 (or adjust layout)
-            int z = i / 10;         // increase z every 10 chunks
+            int x = i % 5;         // lay chunks out in a row of 5 (or adjust layout)
+            int z = i / 5;         // increase z every 5 chunks
             glm::vec3 chunkPos = glm::vec3(x * chunkSize, 0, z * chunkSize);
 
             Chunk chunk(chunkPos, chunkSize);

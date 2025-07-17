@@ -3,6 +3,7 @@
 #include "Block.h"
 #include "Mesh.h"
 #include <vector>
+#include "PerlinNoise.hpp"
 
 class Chunk {
 public:
@@ -10,7 +11,7 @@ public:
     int chunkSize;
     std::vector<Block> blocks;
 
-
+    static siv::PerlinNoise perlin;
 
     Chunk(glm::vec3 pos, int size = 16);
 

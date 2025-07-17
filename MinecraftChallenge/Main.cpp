@@ -56,7 +56,7 @@ int main(void) {
 	
 
 	GameWorld gameWorld;
-	gameWorld.generateWorld(5);
+	gameWorld.generateWorld(25);
 	gameWorld.uploadAllChunksToMesh(blockMesh);
 	
 	//float lastTime = glfwGetTime();
