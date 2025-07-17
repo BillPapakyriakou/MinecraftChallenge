@@ -8,7 +8,7 @@ Chunk::Chunk(glm::vec3 pos, int size)
 }
 
 /*
-
+// Superflat world generation (no perlin noise)
 void Chunk::generateChunkSuperflat() {
     blocks.clear();
     blocks.reserve(chunkSize * chunkSize / 2 * chunkSize);  // Pre-reserve memory for all blocks
@@ -30,6 +30,7 @@ void Chunk::generateChunkSuperflat() {
 
 
 /*
+// Without caves (2D perlin noise) ver1
 void Chunk::generateChunk() {
     blocks.clear();
 
@@ -62,6 +63,8 @@ void Chunk::generateChunk() {
 }
 */
 
+/*
+// Without caves (2D perlin noise) ver2
 void Chunk::generateChunk() {
     blocks.clear();
 
@@ -90,9 +93,75 @@ void Chunk::generateChunk() {
         }
     }
 }
+*/
 
 
 
+// With caves (3D perlin noise) ver1
+void Chunk::generateChunk() {
+    blocks.clear();
+
+    for (int x = 0; x < chunkSize; ++x) {
+        for (int z = 0; z < chunkSize; ++z) {
+            int worldX = static_cast<int>(position.x) + x;
+            int worldZ = static_cast<int>(position.z) + z;
+
+            // Generate surface height
+            float heightNoise = perlin.noise2D_01(worldX * 0.002f, worldZ * 0.002f);
+            int surfaceHeight = static_cast<int>(50 + heightNoise * 80);
+            if (surfaceHeight > 255) surfaceHeight = 255;
+
+            for (int y = 0; y <= surfaceHeight; ++y) {
+                // 3D noise for caves
+                float caveNoise = perlin.noise3D_01(worldX * 0.05f, y * 0.05f, worldZ * 0.05f);
+
+                if (caveNoise < 0.45f) {
+                    // Air (cave), skip block
+                    continue;
+                }
+
+                glm::vec3 blockPos = position + glm::vec3(x, y, z);
+                int blockID = 1;  // dirt only
+                blocks.push_back(Block(blockPos, blockID));
+            }
+        }
+    }
+}
+
+
+/*
+// With caves (3D perlin noise) ver2
+void Chunk::generateChunk() {
+
+    blocks.clear();
+
+    for (int x = 0; x < chunkSize; ++x) {
+        for (int z = 0; z < chunkSize; ++z) {
+            int worldX = static_cast<int>(position.x) + x;
+            int worldZ = static_cast<int>(position.z) + z;
+
+            // Generate surface height
+            float heightNoise = perlin.noise2D_01(worldX * 0.0025f, worldZ * 0.0025f);
+            int surfaceHeight = static_cast<int>(50 + heightNoise * 80);
+            if (surfaceHeight > 255) surfaceHeight = 255;
+
+            for (int y = 0; y <= surfaceHeight; ++y) {
+                // 3D noise for caves, slightly less frequent caves
+                float caveNoise = perlin.noise3D_01(worldX * 0.055f, y * 0.055f, worldZ * 0.055f);
+
+                if (caveNoise < 0.42f) {  // higher threshold means fewer caves
+                    // Air (cave), skip block
+                    continue;
+                }
+
+                glm::vec3 blockPos = position + glm::vec3(x, y, z);
+                int blockID = 1;  // dirt only
+                blocks.push_back(Block(blockPos, blockID));
+            }
+        }
+    }
+}
+*/
 
 
 
