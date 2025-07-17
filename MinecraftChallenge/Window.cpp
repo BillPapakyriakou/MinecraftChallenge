@@ -7,7 +7,7 @@ Window::Window(const std::string& title, bool fullscreen) {
     initializeGLEW(); // Initialize GLEW after the window is created
 
     glEnable(GL_DEPTH_TEST); // Enable depth testing
-    glClearColor(0.0f, 0.3f, 0.8f, 1.0f); // Black background
+    glClearColor(0.0f, 0.3f, 0.8f, 1.0f); // Background color
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE); // Ensure we can capture key presses
 }

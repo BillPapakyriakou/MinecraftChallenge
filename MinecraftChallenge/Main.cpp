@@ -51,7 +51,7 @@ int main(void) {
 	
 
 	// Create a GameWorld with one chunk
-	GameWorld gameWorld(glm::vec3(0.0f, 0.0f, 0.0f), 8);
+	GameWorld gameWorld(glm::vec3(0.0f, 0.0f, 0.0f), 16);
 
 	// Initialize chunk data once
 	gameWorld.chunk.uploadToMesh(blockMesh);

@@ -1,9 +1,10 @@
-﻿  Mesh.cpp
-C:\Users\billp\OneDrive\Υπολογιστής\GLP\MinecraftChallenge\MinecraftChallenge\MinecraftChallenge\Mesh.cpp(296,103): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-C:\Users\billp\OneDrive\Υπολογιστής\GLP\MinecraftChallenge\MinecraftChallenge\MinecraftChallenge\Mesh.cpp(296,55): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-  LINK : 0 new modules and 1 (out of 79) modules have changed since prior linking
+﻿  Chunk.cpp
+  Main.cpp
+  Generating Code...
+  LINK : 0 new modules and 2 (out of 79) modules have changed since prior linking
   Starting pass 2
-       Mesh.obj
+       Main.obj
+       Chunk.obj
        MSVCRTD.lib(loadcfg.obj)
   Finished pass 2
   MinecraftChallenge.vcxproj -> C:\Users\billp\OneDrive\Υπολογιστής\GLP\MinecraftChallenge\MinecraftChallenge\x64\Debug\MinecraftChallenge.exe

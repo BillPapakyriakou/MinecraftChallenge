@@ -11,7 +11,8 @@ void Chunk::generateChunk() {
     blocks.reserve(chunkSize * chunkSize / 2 * chunkSize);  // Pre-reserve memory for all blocks
 
     for (int x = 0; x < chunkSize; ++x) {
-        for (int y = 0; y < chunkSize / 2; ++y) {
+        //for (int y = 0; y < chunkSize / 2; ++y) {
+        for (int y = 0; y < 256; ++y) {
             for (int z = 0; z < chunkSize; ++z) {
                 glm::vec3 blockPos = position + glm::vec3(x, y, z);
                 int blockID = 1;
@@ -25,7 +26,7 @@ void Chunk::generateChunk() {
 
 
 void Chunk::uploadToMesh(Mesh& mesh) {
-    static std::vector<glm::vec3> instancePositions;
+    std::vector<glm::vec3> instancePositions;
 
     if (instancePositions.size() != blocks.size()) {
         instancePositions.clear();
