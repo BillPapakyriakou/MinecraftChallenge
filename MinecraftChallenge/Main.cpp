@@ -77,7 +77,7 @@ int main(void) {
 
 		// Get current framebuffer size
 		glfwGetFramebufferSize(glfwWindow, &width, &height);
-		glViewport(0, 0, width, height);  // important line
+		glViewport(0, 0, width, height);  // important line, gl magic
 
 		// If size changed, update projection
 		if (width != lastWidth || height != lastHeight) {

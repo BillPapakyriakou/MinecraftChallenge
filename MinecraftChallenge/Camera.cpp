@@ -1,6 +1,6 @@
 
 #include "Camera.h"
-#include "Matrices.h"  // Include Matrices.h here to define the relationship
+#include "Matrices.h" 
 
 
 Camera::Camera(Matrices* matrices)

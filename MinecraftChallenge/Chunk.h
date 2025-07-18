@@ -7,6 +7,7 @@
 
 class Chunk {
 public:
+
     glm::vec3 position;
     int chunkSize;
     std::vector<Block> blocks;

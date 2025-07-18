@@ -2,7 +2,7 @@
 
 #include "Common.h"
 
-#include "Matrices.h"  // Include here, not just forward declare
+#include "Matrices.h" 
 
 
 class Camera {

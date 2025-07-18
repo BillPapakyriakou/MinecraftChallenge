@@ -15,18 +15,17 @@ public:
         : position(pos),  blockID(id) {}
 
 
-    // Optionally, add a method to get a string representation of the block's type
     std::string getBlockType() const {
         switch (blockID) {
         case 0: return "Air";
         case 1: return "Dirt";
         case 2: return "Stone";
-            // Add other block types as necessary
+            // Add other block types here
         default: return "Unknown";
         }
     }
 
-    // Optionally, you could add a method to set the position or block type
+    
     void setPosition(glm::vec3 newPos) {
         position = newPos;
     }

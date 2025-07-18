@@ -23,19 +23,19 @@ void Mesh::setupMesh() {
 
     std::vector<GLfloat> vertices = {
 
-           // Back
+           // Back face
            1.0f, 0.0f, 0.0f,    // bottom-left
            0.0f, 0.0f, 0.0f,    // bottom-right
            0.0f, 1.0f, 0.0f,    // top-right
            1.0f, 1.0f, 0.0f,    // top-left
 
-           // Front
+           // Front face
            0.0f, 0.0f, 1.0f,    // bottom-left
            1.0f, 0.0f, 1.0f,    // bottom-right
            1.0f, 1.0f, 1.0f,    // top-right
            0.0f, 1.0f, 1.0f,    // top-left
 
-           // Right face (corrected)
+           // Right face
            1.0f, 0.0f, 0.0f,    // bottom-left
            1.0f, 0.0f, 1.0f,    // bottom-right
            1.0f, 1.0f, 1.0f,    // top-right
