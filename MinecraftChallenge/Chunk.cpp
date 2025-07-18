@@ -7,88 +7,157 @@ Chunk::Chunk(glm::vec3 pos, int size)
     generateChunk();
 }
 
+
+
 /*
-// Superflat world generation (no perlin noise)
 void Chunk::generateChunkSuperflat() {
     blocks.clear();
-    blocks.reserve(chunkSize * chunkSize / 2 * chunkSize);  // Pre-reserve memory for all blocks
 
+    constexpr int height = 256;
+    bool solid[16][height][16] = {};
+
+    // Fill the solid array (superflat solid blocks up to height)
     for (int x = 0; x < chunkSize; ++x) {
-        //for (int y = 0; y < chunkSize / 2; ++y) {
-        for (int y = 0; y < 256; ++y) {
+        for (int y = 0; y < height; ++y) {
             for (int z = 0; z < chunkSize; ++z) {
-                glm::vec3 blockPos = position + glm::vec3(x, y, z);
-                int blockID = 1;
-                blocks.push_back(Block(blockPos, blockID));
+                solid[x][y][z] = true;
             }
         }
     }
-    //std::cout << "Blocks in chunk: " << blocks.size() << std::endl;
+
+    // Reserve max possible visible blocks (very rough guess)
+    blocks.reserve(chunkSize * height * chunkSize / 2);
+
+    // Add only visible blocks (blocks with at least one empty neighbor)
+    for (int x = 0; x < chunkSize; ++x) {
+        for (int y = 0; y < height; ++y) {
+            for (int z = 0; z < chunkSize; ++z) {
+                // Check if block is solid (always true here)
+                if (!solid[x][y][z]) continue;
+
+                bool visible = false;
+
+                if (x == 0 || !solid[x - 1][y][z]) visible = true;
+                else if (x == chunkSize - 1 || !solid[x + 1][y][z]) visible = true;
+                else if (y == 0 || !solid[x][y - 1][z]) visible = true;
+                else if (y == height - 1 || !solid[x][y + 1][z]) visible = true;
+                else if (z == 0 || !solid[x][y][z - 1]) visible = true;
+                else if (z == chunkSize - 1 || !solid[x][y][z + 1]) visible = true;
+
+                if (visible) {
+                    glm::vec3 blockPos = position + glm::vec3(x, y, z);
+                    int blockID = (y == height - 1) ? 2 : 1;  // grass on top layer, dirt otherwise
+                    blocks.push_back(Block(blockPos, blockID));
+                }
+            }
+        }
+    }
 }
 */
-
-
 
 /*
 // Without caves (2D perlin noise) ver1
 void Chunk::generateChunk() {
     blocks.clear();
 
+    // Track solid blocks in the chunk for face culling
+    bool solid[16][256][16] = {};
+
+    // First pass: generate terrain height and fill solid array
     for (int x = 0; x < chunkSize; ++x) {
         for (int z = 0; z < chunkSize; ++z) {
             int worldX = static_cast<int>(position.x) + x;
             int worldZ = static_cast<int>(position.z) + z;
 
-            // Large-scale smooth hills
+            // Your noise values
             float largeHill = perlin.noise2D_01(worldX * 0.001f, worldZ * 0.001f);
-
-            // Smaller detail bumps
             float detail = perlin.noise2D_01(worldX * 0.01f, worldZ * 0.01f);
-
-            // Combine them with weights
             float combined = largeHill * 0.7f + detail * 0.3f;
 
-            // Scale to height range (e.g. 50 to 120)
             int height = static_cast<int>(50 + combined * 70);
-
             if (height > 255) height = 255;
 
             for (int y = 0; y <= height; ++y) {
-                glm::vec3 blockPos = position + glm::vec3(x, y, z);
-                int blockID = (y == height) ? 2 : 1; // grass on top, dirt below
-                blocks.push_back(Block(blockPos, blockID));
+                solid[x][y][z] = true;
+            }
+        }
+    }
+
+    // Second pass: add only blocks that have at least one empty neighbor (visible blocks)
+    for (int x = 0; x < chunkSize; ++x) {
+        for (int z = 0; z < chunkSize; ++z) {
+            for (int y = 0; y < 256; ++y) {
+                if (!solid[x][y][z]) continue;
+
+                bool visible = false;
+
+                if (x == 0 || !solid[x - 1][y][z]) visible = true;
+                else if (x == chunkSize - 1 || !solid[x + 1][y][z]) visible = true;
+                else if (y == 0 || !solid[x][y - 1][z]) visible = true;
+                else if (y == 255 || !solid[x][y + 1][z]) visible = true;
+                else if (z == 0 || !solid[x][y][z - 1]) visible = true;
+                else if (z == chunkSize - 1 || !solid[x][y][z + 1]) visible = true;
+
+                if (visible) {
+                    glm::vec3 blockPos = position + glm::vec3(x, y, z);
+                    int blockID = (y == 255 || !solid[x][y + 1][z]) ? 2 : 1; // grass on top if topmost visible block
+                    blocks.push_back(Block(blockPos, blockID));
+                }
             }
         }
     }
 }
 */
+
 
 /*
 // Without caves (2D perlin noise) ver2
 void Chunk::generateChunk() {
     blocks.clear();
 
+    // Temporary array to track solid blocks
+    bool solid[16][256][16] = {};
+
+    // === First pass: Fill solid blocks based on 2D terrain ===
     for (int x = 0; x < chunkSize; ++x) {
         for (int z = 0; z < chunkSize; ++z) {
             int worldX = static_cast<int>(position.x) + x;
             int worldZ = static_cast<int>(position.z) + z;
 
-            // Slightly higher frequencies for steeper, more frequent hills
-            float largeHill = perlin.noise2D_01(worldX * 0.002f, worldZ * 0.002f);  
-            float detail = perlin.noise2D_01(worldX * 0.02f, worldZ * 0.02f);       
+            float largeHill = perlin.noise2D_01(worldX * 0.002f, worldZ * 0.002f);
+            float detail = perlin.noise2D_01(worldX * 0.02f, worldZ * 0.02f);
 
-            // Adjusted weights to favor detail more for rougher terrain but still mostly smooth
             float combined = largeHill * 0.6f + detail * 0.4f;
-
-            // Increase amplitude a bit for higher hills
-            int height = static_cast<int>(50 + combined * 80);  // from 70 to 80 height range
-
+            int height = static_cast<int>(50 + combined * 80);
             if (height > 255) height = 255;
 
             for (int y = 0; y <= height; ++y) {
-                glm::vec3 blockPos = position + glm::vec3(x, y, z);
-                int blockID = (y == height) ? 2 : 1; // grass on top, dirt below
-                blocks.push_back(Block(blockPos, blockID));
+                solid[x][y][z] = true; // mark as filled
+            }
+        }
+    }
+
+    // === Second pass: Add only visible blocks (those with at least one exposed face) ===
+    for (int x = 0; x < chunkSize; ++x) {
+        for (int z = 0; z < chunkSize; ++z) {
+            for (int y = 0; y < 256; ++y) {
+                if (!solid[x][y][z]) continue;
+
+                bool visible = false;
+
+                // Check 6 neighbor directions
+                if (x == 0 || !solid[x - 1][y][z]) visible = true;
+                else if (x == chunkSize - 1 || !solid[x + 1][y][z]) visible = true;
+                else if (y == 0 || !solid[x][y - 1][z]) visible = true;
+                else if (y == 255 || !solid[x][y + 1][z]) visible = true;
+                else if (z == 0 || !solid[x][y][z - 1]) visible = true;
+                else if (z == chunkSize - 1 || !solid[x][y][z + 1]) visible = true;
+
+                if (visible) {
+                    glm::vec3 blockPos = position + glm::vec3(x, y, z);
+                    int blockID = (y + 1 >= 256 || !solid[x][y + 1][z]) ? 2 : 1; // grass on top
+                    blocks.push_back(Block(blockPos, blockID));
+                }
             }
         }
     }
@@ -96,73 +165,131 @@ void Chunk::generateChunk() {
 */
 
 
-
+/*
 // With caves (3D perlin noise) ver1
 void Chunk::generateChunk() {
     blocks.clear();
 
+    constexpr int maxHeight = 256;
+    bool solid[16][maxHeight][16] = {};
+
+    // Step 1: Generate solid blocks with caves
     for (int x = 0; x < chunkSize; ++x) {
         for (int z = 0; z < chunkSize; ++z) {
             int worldX = static_cast<int>(position.x) + x;
             int worldZ = static_cast<int>(position.z) + z;
 
-            // Generate surface height
+            // Surface height with 2D noise
             float heightNoise = perlin.noise2D_01(worldX * 0.002f, worldZ * 0.002f);
             int surfaceHeight = static_cast<int>(50 + heightNoise * 80);
-            if (surfaceHeight > 255) surfaceHeight = 255;
+            if (surfaceHeight > maxHeight - 1) surfaceHeight = maxHeight - 1;
 
             for (int y = 0; y <= surfaceHeight; ++y) {
                 // 3D noise for caves
                 float caveNoise = perlin.noise3D_01(worldX * 0.05f, y * 0.05f, worldZ * 0.05f);
 
+                // If caveNoise < threshold, it's air (no block)
                 if (caveNoise < 0.45f) {
-                    // Air (cave), skip block
-                    continue;
+                    solid[x][y][z] = false;
                 }
+                else {
+                    solid[x][y][z] = true;
+                }
+            }
 
-                glm::vec3 blockPos = position + glm::vec3(x, y, z);
-                int blockID = 1;  // dirt only
-                blocks.push_back(Block(blockPos, blockID));
+            // Above surface, everything is air
+            for (int y = surfaceHeight + 1; y < maxHeight; ++y) {
+                solid[x][y][z] = false;
             }
         }
     }
-}
 
-
-/*
-// With caves (3D perlin noise) ver2
-void Chunk::generateChunk() {
-
-    blocks.clear();
-
+    // Step 2: Add only visible blocks (blocks with at least one air neighbor)
     for (int x = 0; x < chunkSize; ++x) {
-        for (int z = 0; z < chunkSize; ++z) {
-            int worldX = static_cast<int>(position.x) + x;
-            int worldZ = static_cast<int>(position.z) + z;
+        for (int y = 0; y < maxHeight; ++y) {
+            for (int z = 0; z < chunkSize; ++z) {
+                if (!solid[x][y][z]) continue;
 
-            // Generate surface height
-            float heightNoise = perlin.noise2D_01(worldX * 0.0025f, worldZ * 0.0025f);
-            int surfaceHeight = static_cast<int>(50 + heightNoise * 80);
-            if (surfaceHeight > 255) surfaceHeight = 255;
+                bool visible = false;
 
-            for (int y = 0; y <= surfaceHeight; ++y) {
-                // 3D noise for caves, slightly less frequent caves
-                float caveNoise = perlin.noise3D_01(worldX * 0.055f, y * 0.055f, worldZ * 0.055f);
+                // Check neighbors (with bounds checks)
+                if (x == 0 || !solid[x - 1][y][z]) visible = true;
+                else if (x == chunkSize - 1 || !solid[x + 1][y][z]) visible = true;
+                else if (y == 0 || !solid[x][y - 1][z]) visible = true;
+                else if (y == maxHeight - 1 || !solid[x][y + 1][z]) visible = true;
+                else if (z == 0 || !solid[x][y][z - 1]) visible = true;
+                else if (z == chunkSize - 1 || !solid[x][y][z + 1]) visible = true;
 
-                if (caveNoise < 0.42f) {  // higher threshold means fewer caves
-                    // Air (cave), skip block
-                    continue;
+                if (visible) {
+                    glm::vec3 blockPos = position + glm::vec3(x, y, z);
+                    int blockID = 1;  // dirt block ID, can customize if you want
+                    blocks.push_back(Block(blockPos, blockID));
                 }
-
-                glm::vec3 blockPos = position + glm::vec3(x, y, z);
-                int blockID = 1;  // dirt only
-                blocks.push_back(Block(blockPos, blockID));
             }
         }
     }
 }
 */
 
+
+// With caves (3D perlin noise) ver2
+void Chunk::generateChunk() {
+    blocks.clear();
+
+    constexpr int maxHeight = 256;
+    bool solid[16][maxHeight][16] = {};
+
+    // Step 1: Generate solid blocks with caves
+    for (int x = 0; x < chunkSize; ++x) {
+        for (int z = 0; z < chunkSize; ++z) {
+            int worldX = static_cast<int>(position.x) + x;
+            int worldZ = static_cast<int>(position.z) + z;
+
+            float heightNoise = perlin.noise2D_01(worldX * 0.0025f, worldZ * 0.0025f);
+            int surfaceHeight = static_cast<int>(50 + heightNoise * 80);
+            if (surfaceHeight > maxHeight - 1) surfaceHeight = maxHeight - 1;
+
+            for (int y = 0; y <= surfaceHeight; ++y) {
+                float caveNoise = perlin.noise3D_01(worldX * 0.055f, y * 0.055f, worldZ * 0.055f);
+
+                if (caveNoise < 0.42f) {
+                    solid[x][y][z] = false; // cave (air)
+                }
+                else {
+                    solid[x][y][z] = true; // solid block
+                }
+            }
+            // Above surface is air
+            for (int y = surfaceHeight + 1; y < maxHeight; ++y) {
+                solid[x][y][z] = false;
+            }
+        }
+    }
+
+    // Step 2: Add only visible blocks (blocks with at least one air neighbor)
+    for (int x = 0; x < chunkSize; ++x) {
+        for (int y = 0; y < maxHeight; ++y) {
+            for (int z = 0; z < chunkSize; ++z) {
+                if (!solid[x][y][z]) continue;
+
+                bool visible = false;
+
+                if (x == 0 || !solid[x - 1][y][z]) visible = true;
+                else if (x == chunkSize - 1 || !solid[x + 1][y][z]) visible = true;
+                else if (y == 0 || !solid[x][y - 1][z]) visible = true;
+                else if (y == maxHeight - 1 || !solid[x][y + 1][z]) visible = true;
+                else if (z == 0 || !solid[x][y][z - 1]) visible = true;
+                else if (z == chunkSize - 1 || !solid[x][y][z + 1]) visible = true;
+
+                if (visible) {
+                    glm::vec3 blockPos = position + glm::vec3(x, y, z);
+                    int blockID = 1;  // dirt block
+                    blocks.push_back(Block(blockPos, blockID));
+                }
+            }
+        }
+    }
+}
 
 
 void Chunk::uploadToMesh(Mesh& mesh) {
